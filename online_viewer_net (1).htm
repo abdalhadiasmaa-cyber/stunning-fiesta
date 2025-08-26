@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chew Chew Cake</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            direction: rtl; /* Default to RTL for Arabic */
+        }
+        .container {
+            max-width: 1024px;
+            margin: auto;
+            padding: 1.5rem;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .text-left {
+            text-align: left;
+        }
+        /* Custom modal styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            transform: scale(1);
+            transition: transform 0.3s ease-out;
+        }
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a202c;
+            margin-bottom: 1rem;
+        }
+        .modal-message {
+            font-size: 1.125rem;
+            font-weight: 500;
+            color: #4a5568;
+            margin-bottom: 1.5rem;
+        }
+        .modal-button {
+            padding: 0.6rem 1.5rem;
+            background-color: #3b82f6;
+            color: white;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .modal-button:hover {
+            background-color: #2563eb;
+        }
+        /* Style for disabled buttons */
+        button:disabled, a.button-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 p-4 text-gray-900">
+
+    <div id="app" class="container">
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <div class="flex items-center gap-2">
+                <img src="https://placehold.co/100x60/d3a67d/ffffff?text=Chew+Chew+Cake" alt="Chew Chew Cake Logo" class="h-16 w-auto rounded-lg shadow-sm" />
+                <h1 class="text-2xl font-bold" id="app-title">Chew Chew Cake</h1>
+            </div>
+            <div class="flex gap-2">
+                <button id="lang-switch-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">AR</button>
+                <button id="login-logout-btn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200">Login</button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <div class="p-4 shadow-lg bg-white rounded-lg">
+            <!-- Customization Page -->
+            <div id="customization-page">
+                <h2 class="text-xl mb-6 font-extrabold text-gray-900 text-center" id="customize-cake-title">Customize Your Cake! 🎂</h2>
+
+                <!-- Cake Preview Image (Placeholder) -->
+                <div class="mb-10 text-center relative">
+                    <img src="https://placehold.co/400x300/e0f2fe/1e3a8a?text=Your+Cake+Here" alt="Your Cake Here" class="mx-auto rounded-2xl shadow-xl border-4 border-blue-300 transform hover:scale-105 transition-transform duration-300" id="cake-preview-img" />
+                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white px-4 py-2 rounded-full shadow-lg text-2xl font-bold text-purple-700" id="total-price-display">
+                        Total Price: ILS 0
+                    </div>
+                </div>
+
+                <!-- Cake Customization Sections will be rendered here by JS -->
+                <div id="customization-sections"></div>
+
+                <!-- Custom Design Notes Input and Image Upload -->
+                <div id="custom-design-inputs" class="mb-8 p-6 bg-white rounded-xl shadow-lg hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4" id="custom-design-title">Custom Design Details (Add notes or image)</h2>
+                    <textarea id="custom-design-notes" class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 mb-4" rows="4" placeholder="Write your custom design details here (e.g., 'I want a golden unicorn, with the name 'Sara' in Kufic script')"></textarea>
+                    <label for="custom-design-image" class="block text-gray-700 text-sm font-bold mb-2" id="upload-image-label">Or upload your custom design image:</label>
+                    <input type="file" id="custom-design-image-input" accept="image/*" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" />
+                    <div id="uploaded-image-preview-container" class="mt-4 text-center hidden">
+                        <p class="text-gray-700 mb-2" id="image-preview-text">Uploaded Image Preview:</p>
+                        <img id="uploaded-image-preview" alt="Custom Design Preview" class="mx-auto max-h-48 rounded-lg shadow-md" />
+                    </div>
+                </div>
+                
+                <!-- Custom Color Text Input -->
+                <div id="custom-color-input-section" class="mb-8 p-6 bg-white rounded-xl shadow-lg hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4" id="specify-color-title">Specify your custom color:</h2>
+                    <input type="text" id="custom-color-text-input" class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" placeholder="Specify your custom color (e.g., 'Teal', 'Lavender')">
+                </div>
+
+                <!-- Custom Filling Text Input -->
+                <div id="custom-filling-input-section" class="mb-8 p-6 bg-white rounded-xl shadow-lg hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4" id="specify-filling-title">Specify your custom filling:</h2>
+                    <input type="text" id="custom-filling-text-input" class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" placeholder="Specify your custom filling (e.g., 'Mango mousse', 'Pecan praline')">
+                </div>
+
+                <!-- Order Summary -->
+                <div class="mb-10 p-6 bg-white rounded-xl shadow-lg border-l-4 border-blue-500">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4" id="order-summary-title">Order Summary</h2>
+                    <div id="order-summary-details"></div>
+                    <p class="text-xl font-bold text-gray-900 mt-4" id="final-total-price-summary">
+                        Total Price: <span class="text-purple-700">ILS 0</span>
+                    </p>
+                </div>
+
+                <!-- Proceed to Checkout Button -->
+                <div class="text-center">
+                    <button id="proceed-to-checkout-btn" class="px-10 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-xl rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                        Proceed to Checkout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Checkout Page -->
+            <div id="checkout-page" class="hidden">
+                <h2 class="text-xl mb-4 font-extrabold text-gray-900 text-center" id="checkout-title">Checkout</h2>
+
+                <div class="mb-8 p-6 bg-white rounded-xl shadow-lg border-l-4 border-purple-500">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4" id="your-cake-summary-title">Your Cake Summary</h2>
+                    <div id="checkout-order-summary-details" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-lg text-gray-700"></div>
+                    <p class="text-2xl font-bold text-gray-900 mt-6" id="checkout-total-price-summary">
+                        Total Price: <span class="text-purple-700">ILS 0</span>
+                    </p>
+                    <p class="text-xl font-semibold text-blue-700 mt-4" id="estimated-preparation-time">
+                        Estimated preparation time: <span class="font-bold">2-4 hours</span>
+                    </p>
+                    <p class="text-xl font-semibold text-blue-700" id="estimated-delivery-time">
+                        Estimated delivery time: <span class="font-bold">1-2 working days</span>
+                    </p>
+                </div>
+
+                <div class="mb-8 p-6 bg-white rounded-xl shadow-lg">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4" id="customer-info-title">Customer Information</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="customer-name" class="block text-gray-700 text-sm font-bold mb-2" id="customer-name-label">Full Name:</label>
+                            <input type="text" id="customer-name" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" required />
+                        </div>
+                        <div>
+                            <label for="customer-phone" class="block text-gray-700 text-sm font-bold mb-2" id="customer-phone-label">Phone Number:</label>
+                            <input type="tel" id="customer-phone" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" required />
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="customer-email" class="block text-gray-700 text-sm font-bold mb-2" id="customer-email-label">Email (Optional):</label>
+                            <input type="email" id="customer-email" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" />
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="customer-address" class="block text-gray-700 text-sm font-bold mb-2" id="customer-address-label">Delivery Address:</label>
+                            <textarea id="customer-address" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" rows="3" required></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Method Selection -->
+                <div class="mb-8 p-6 bg-white rounded-xl shadow-lg">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4" id="select-payment-method-title">Select Payment Method</h2>
+                    <div class="flex flex-wrap gap-4 justify-start" id="payment-method-buttons">
+                        <!-- Stripe button removed -->
+                        <button id="select-paypal-btn" class="px-6 py-3 rounded-md font-semibold transition-all duration-200 bg-blue-200 text-blue-800 hover:bg-blue-300">
+                            PayPal
+                        </button>
+                        <button id="select-cod-btn" class="px-6 py-3 rounded-md font-semibold transition-all duration-200 bg-green-200 text-green-800 hover:bg-green-300">
+                            Cash on Delivery
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex justify-between flex-wrap gap-4 mt-8">
+                    <button id="return-to-edit-btn" class="px-8 py-3 bg-gray-300 text-gray-800 font-bold rounded-full shadow-md hover:bg-gray-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        Return to Edit
+                    </button>
+                    <a id="whatsapp-order-link" href="#" target="_blank" rel="noreferrer" class="w-full md:w-auto">
+                        <button class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md w-full">
+                            Send on WhatsApp
+                        </button>
+                    </a>
+                    <button id="confirm-order-final-btn" class="px-10 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-xl rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                        Confirm Final Order
+                    </button>
+                </div>
+            </div>
+
+            <!-- Data Visualization Section (CRUD & Chart.js Demo) -->
+            <div id="data-dashboard" class="mt-12 p-6 bg-blue-50 rounded-xl shadow-lg hidden">
+                <h2 class="text-2xl font-bold text-blue-800 mb-6 text-center">لوحة تحكم بيانات الطلبات (IndexedDB و Chart.js)</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- IndexedDB Operations -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-blue-400">
+                        <h3 class="text-xl font-semibold text-blue-700 mb-4">الطلبات المحلية (IndexedDB)</h3>
+                        <div class="flex flex-col gap-3">
+                            <button id="add-mock-order-btn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">أضف طلب تجريبي محلي</button>
+                            <button id="list-local-orders-btn" class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600">اعرض الطلبات المحلية</button>
+                            <button id="clear-local-orders-btn" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">امسح الطلبات المحلية</button>
+                        </div>
+                        <div class="mt-4 p-3 bg-gray-50 rounded-md border border-gray-200 max-h-40 overflow-y-auto" id="local-orders-output">
+                            <p class="text-gray-600">ستظهر الطلبات المحلية هنا.</p>
+                        </div>
+                    </div>
+
+                    <!-- Chart.js Visualization -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-green-400">
+                        <h3 class="text-xl font-semibold text-green-700 mb-4">توزيع النكهات المفضلة</h3>
+                        <canvas id="flavorChart"></canvas>
+                        <button id="update-chart-btn" class="mt-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 w-full">تحديث الرسم البياني</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal Container -->
+    <div id="custom-modal-container"></div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, getDocs, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // Global Firebase instances
+        window.firebaseApp = initializeApp;
+        window.getAuth = getAuth;
+        window.GoogleAuthProvider = GoogleAuthProvider;
+        window.signInWithPopup = signInWithPopup;
+        window.signOut = signOut;
+        window.onAuthStateChanged = onAuthStateChanged;
+        window.signInAnonymously = signInAnonymously;
+        window.signInWithCustomToken = signInWithCustomToken;
+        window.getFirestore = getFirestore;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.serverTimestamp = serverTimestamp;
+        window.getDocs = getDocs;
+        window.query = query;
+    </script>
+
+    <!-- Main Application Logic -->
+    <script>
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => console.log('SW registered: ', registration))
+                    .catch(registrationError => console.log('SW registration failed: ', registrationError));
+            });
+        }
+
+        // --- Translations (JSON) ---
+        const translations = {
+            en: {
+                title: "Chew Chew Cake",
+                customizeCake: "Customize Your Cake! 🎂",
+                shape: "Shape",
+                round: "Round",
+                square: "Square",
+                heart: "Heart",
+                rectangle: "Rectangle",
+                star: "Star",
+                flavor: "Flavor",
+                chocolate: "Chocolate",
+                vanilla: "Vanilla",
+                strawberry: "Strawberry",
+                redVelvet: "Red Velvet",
+                lemon: "Lemon",
+                pistachio: "Pistachio",
+                color: "Color",
+                white: "White",
+                maroon: "Maroon",
+                pink: "Pink",
+                blue: "Blue",
+                green: "Green",
+                yellow: "Yellow",
+                black: "Black",
+                gold: "Gold",
+                otherColor: "Other Color",
+                specifyColor: "Specify your custom color (e.g., 'Teal', 'Lavender')",
+                design: "Design",
+                simple: "Simple",
+                floral: "Floral",
+                cartoon: "Cartoon",
+                custom: "Custom Design",
+                creamType: "Cream Type",
+                buttercream: "Buttercream",
+                whippedCream: "Whipped Cream",
+                ganache: "Chocolate Ganache",
+                creamCheese: "Cream Cheese",
+                filling: "Filling",
+                noFilling: "No Filling",
+                strawberryJam: "Strawberry Jam (Natural)",
+                raspberryCompote: "Raspberry Compote (Natural)",
+                lemonCurd: "Lemon Curd (Natural)",
+                chocolateFudge: "Chocolate Fudge",
+                caramel: "Salted Caramel",
+                nutella: "Nutella",
+                otherFilling: "Other Filling",
+                specifyFilling: "Specify your custom filling (e.g., 'Mango mousse', 'Pecan praline')",
+                customDesignNotesTitle: "Custom Design Details (Add notes or image)",
+                customDesignNotesPlaceholder: "Write your custom design details here (e.g., 'I want a golden unicorn, with the name 'Sara' in Kufic script')",
+                uploadImage: "Or upload your custom design image:",
+                imagePreview: "Uploaded Image Preview:",
+                orderSummary: "Order Summary",
+                totalPrice: "Total Price",
+                ils: "ILS",
+                notSelected: "Not Selected",
+                checkout: "Proceed to Checkout",
+                confirmOrderFinal: "Confirm Final Order",
+                login: "Login",
+                logout: "Logout",
+                name: "Full Name",
+                phone: "Phone Number",
+                email: "Email (Optional)",
+                address: "Delivery Address",
+                payPal: "PayPal",
+                cashOnDelivery: "Cash on Delivery",
+                selectPaymentMethod: "Select Payment Method",
+                payPalNotSet: "PayPal link not configured",
+                sendOnWhatsApp: "Send on WhatsApp",
+                orderSaved: "Order saved successfully! We'll contact you soon to confirm.",
+                errorSavingOrder: "Error saving order. Please try again.",
+                loginFailed: "Login failed. Please try again.",
+                alertTitle: "Chew Chew Cake Message",
+                alertClose: "OK",
+                customerInfo: "Customer Information",
+                returnToEdit: "Return to Edit",
+                fillAllOptions: "Please select all cake options before proceeding.",
+                fillCustomDesignDetails: "Please add notes for your custom design or upload an image.",
+                fillAllContactInfo: "Please fill in all required contact information.",
+                selectAPaymentMethod: "Please select a payment method.",
+                estimatedPreparationTime: "Estimated preparation time:",
+                estimatedDeliveryTime: "Estimated delivery time:",
+                hours: "hours",
+                workingDays: "working days",
+                yourCakeHere: "Your Cake Here",
+                addLocalOrder: "Add Mock Local Order",
+                listLocalOrders: "List Local Orders",
+                clearLocalOrders: "Clear Local Orders",
+                localOrdersOutput: "Local orders will appear here.",
+                flavorDistribution: "Preferred Flavor Distribution",
+                updateChart: "Update Chart",
+            },
+            ar: {
+                title: "Chew Chew Cake", // Changed to English as requested
+                customizeCake: "صمم كيكتك الخاصة! 🎂",
+                shape: "الشكل",
+                round: "دائري",
+                square: "مربع",
+                heart: "قلب",
+                rectangle: "مستطيل",
+                star: "نجمة",
+                flavor: "النكهة",
+                chocolate: "شوكولاتة",
+                vanilla: "فانيليا",
+                strawberry: "فراولة",
+                redVelvet: "ريد فيلفت",
+                lemon: "ليمون",
+                pistachio: "فستق",
+                color: "اللون",
+                white: "أبيض",
+                maroon: "خمري",
+                pink: "وردي",
+                blue: "أزرق",
+                green: "أخضر",
+                yellow: "أصفر",
+                black: "أسود",
+                gold: "ذهبي",
+                otherColor: "ألوان أخرى",
+                specifyColor: "حدد لونك المخصص (مثال: 'تركوازي', 'بنفسجي فاتح')",
+                design: "التصميم",
+                simple: "بسيط",
+                floral: "زهور",
+                cartoon: "رسوم كرتونية",
+                custom: "تصميم خاص",
+                creamType: "نوع الكريمة",
+                buttercream: "كريمة الزبدة",
+                whippedCream: "كريمة مخفوقة",
+                ganache: "جاناش شوكولاتة",
+                creamCheese: "كريمة الجبن",
+                filling: "الحشوة",
+                noFilling: "بدون حشوة",
+                strawberryJam: "مربى الفراولة (طبيعي)",
+                raspberryCompote: "كومبوت التوت (طبيعي)",
+                lemonCurd: "كريم الليمون (طبيعي)",
+                chocolateFudge: "فادج الشوكولاتة",
+                caramel: "كراميل مملح",
+                nutella: "نوتيلا",
+                otherFilling: "حشوات أخرى",
+                specifyFilling: "حدد حشوتك المخصصة (مثال: 'موس المانجو', 'برالين البقان')",
+                customDesignNotesTitle: "تفاصيل التصميم الخاص (أضف ملاحظات أو صورة)",
+                customDesignNotesPlaceholder: "اكتب هنا تفاصيل تصميمك الخاص (مثال: 'أريد صورة وحيد القرن باللون الذهبي، مع كتابة اسم 'سارة' بالخط الكوفي')",
+                uploadImage: "أو حمل صورة للتصميم الخاص بك:",
+                imagePreview: "معاينة الصورة المحملة:",
+                orderSummary: "ملخص الطلب",
+                totalPrice: "السعر الكلي",
+                ils: "شيكل",
+                notSelected: "لم يتم الاختيار",
+                checkout: "متابعة للدفع",
+                confirmOrderFinal: "تأكيد الطلب النهائي",
+                login: "تسجيل الدخول",
+                logout: "تسجيل الخروج",
+                name: "الاسم الكامل",
+                phone: "رقم الهاتف",
+                email: "البريد الإلكتروني (اختياري)",
+                address: "عنوان التوصيل",
+                payPal: "باي بال",
+                cashOnDelivery: "الدفع عند الاستلام",
+                selectPaymentMethod: "اختر طريقة الدفع",
+                payPalNotSet: "رابط PayPal غير مفعّل",
+                sendOnWhatsApp: "إرسال عبر واتساب",
+                orderSaved: "تم استلام طلبك بنجاح! سيتم التواصل معك قريباً لتأكيد الطلب.",
+                errorSavingOrder: "خطأ في حفظ الطلب. الرجاء المحاولة مرة أخرى.",
+                loginFailed: "فشل تسجيل الدخول. الرجاء المحاولة مرة أخرى.",
+                alertTitle: "رسالة تشو تشو كيك",
+                alertClose: "حسناً",
+                customerInfo: "معلومات التواصل",
+                returnToEdit: "العودة للتعديل",
+                fillAllOptions: "الرجاء اختيار جميع خيارات الكيك قبل المتابعة.",
+                fillCustomDesignDetails: "الرجاء إضافة ملاحظات لتصميمك الخاص أو تحميل صورة.",
+                fillAllContactInfo: "الرجاء ملء جميع معلومات التواصل المطلوبة.",
+                selectAPaymentMethod: "الرجاء اختيار طريقة الدفع.",
+                estimatedPreparationTime: "وقت التحضير المقدر:",
+                estimatedDeliveryTime: "وقت التوصيل المقدر:",
+                hours: "ساعات",
+                workingDays: "أيام عمل",
+                yourCakeHere: "كيكتك هنا",
+                addLocalOrder: "أضف طلب تجريبي محلي",
+                listLocalOrders: "اعرض الطلبات المحلية",
+                clearLocalOrders: "امسح الطلبات المحلية",
+                localOrdersOutput: "ستظهر الطلبات المحلية هنا.",
+                flavorDistribution: "توزيع النكهات المفضلة",
+                updateChart: "تحديث الرسم البياني",
+            },
+        };
+
+        // --- Global State Management ---
+        let currentLang = localStorage.getItem("lang") || "ar";
+        let currentUser = null; // Firebase user object
+        let firestoreDb = null; // Firestore instance
+        let firebaseAuth = null; // Firebase Auth instance
+
+        // Cake customization selections
+        let selectedShape = '';
+        let selectedFlavor = '';
+        let selectedColor = '';
+        let customColorText = '';
+        let selectedDesign = '';
+        let selectedCream = '';
+        let selectedFilling = '';
+        let customFillingText = '';
+        let customDesignNotes = '';
+        let uploadedCustomDesignImage = null; // Base64 or URL for image
+        let totalPrice = 0;
+
+        // Customer info and checkout flow
+        let customerInfo = { name: '', phone: '', email: '', address: '' };
+        let selectedPaymentMethod = '';
+        let showCheckoutPage = false;
+
+        // Payment links (placeholders for Canvas environment)
+        const payPalMeLink = "https://paypal.me/yourname"; // Replace with your actual PayPal link
+
+        // --- Data Definitions (JSON) ---
+        const shapes = [
+            { id: 'round', nameKey: 'round', price: 0, imageUrl: 'https://placehold.co/100x70/ffe4e1/8b0000?text=Round' },
+            { id: 'square', nameKey: 'square', price: 0, imageUrl: 'https://placehold.co/100x70/fff0f5/dc143c?text=Square' },
+            { id: 'heart', nameKey: 'heart', price: 0, imageUrl: 'https://placehold.co/100x70/ffc0cb/ff69b4?text=Heart' },
+            { id: 'rectangle', nameKey: 'rectangle', price: 0, imageUrl: 'https://placehold.co/100x70/add8e6/4682b4?text=Rect' },
+            { id: 'star', nameKey: 'star', price: 0, imageUrl: 'https://placehold.co/100x70/ffdead/daa520?text=Star' },
+        ];
+
+        const flavors = [
+            { id: 'chocolate', nameKey: 'chocolate', price: 25 }, // Increased
+            { id: 'vanilla', nameKey: 'vanilla', price: 18 }, // Increased
+            { id: 'strawberry', nameKey: 'strawberry', price: 30 }, // Increased
+            { id: 'red-velvet', nameKey: 'redVelvet', price: 35 }, // Increased
+            { id: 'lemon', nameKey: 'lemon', price: 22 }, // Increased
+            { id: 'pistachio', nameKey: 'pistachio', price: 28 }, // Increased
+        ];
+
+        const colors = [
+            { id: 'white', nameKey: 'white', hex: '#FFFFFF', text: '#333333', price: 0 },
+            { id: 'maroon', nameKey: 'maroon', hex: '#800000', text: '#FFFFFF', price: 0 },
+            { id: 'pink', nameKey: 'pink', hex: '#FBCFE8', text: '#D946EF', price: 0 },
+            { id: 'blue', nameKey: 'blue', hex: '#BFDBFE', text: '#3B82F6', price: 0 },
+            { id: 'green', nameKey: 'green', hex: '#D1FAE5', text: '#10B981', price: 0 },
+            { id: 'yellow', nameKey: 'yellow', hex: '#FDE68A', text: '#F59E0B', price: 0 },
+            { id: 'black', nameKey: 'black', hex: '#000000', text: '#FFFFFF', price: 0 },
+            { id: 'gold', nameKey: 'gold', hex: '#FFD700', text: '#333333', price: 0 },
+            { id: 'other', nameKey: 'otherColor', hex: '#CCCCCC', text: '#333333', price: 0 } // Other color option
+        ];
+
+        const designs = [
+            { id: 'simple', nameKey: 'simple', price: 10 }, // Increased
+            { id: 'floral', nameKey: 'floral', price: 25 }, // Increased
+            { id: 'cartoon', nameKey: 'cartoon', price: 35 }, // Increased
+            { id: 'custom', nameKey: 'custom', price: 50 }, // Increased
+        ];
+
+        const creamTypes = [
+            { id: 'buttercream', nameKey: 'buttercream', price: 8 }, // Increased
+            { id: 'whipped_cream', nameKey: 'whippedCream', price: 5 }, // Increased
+            { id: 'ganache', nameKey: 'ganache', price: 10 }, // Increased
+            { id: 'cream_cheese', nameKey: 'creamCheese', price: 12 }, // Increased
+        ];
+
+        const fillingTypes = [
+            { id: 'none', nameKey: 'noFilling', price: 0 },
+            { id: 'strawberry_jam', nameKey: 'strawberryJam', price: 10 }, // Increased
+            { id: 'raspberry_compote', nameKey: 'raspberryCompote', price: 12 }, // Increased
+            { id: 'lemon_curd', nameKey: 'lemonCurd', price: 8 }, // Increased
+            { id: 'chocolate_fudge', nameKey: 'chocolateFudge', price: 15 }, // Increased
+            { id: 'caramel', nameKey: 'caramel', price: 10 }, // Increased
+            { id: 'nutella', nameKey: 'nutella', price: 18 }, // Increased
+            { id: 'other', nameKey: 'otherFilling', price: 0 } // Other filling option
+        ];
+
+        // --- Utility Functions ---
+        function t(key) {
+            return translations[currentLang][key] || key;
+        }
+
+        // Custom Modal Function (replaces alert)
+        function showCustomModal(message, title = t('alertTitle')) {
+            const modalContainer = document.getElementById('custom-modal-container');
+            modalContainer.innerHTML = `
+                <div class="modal">
+                    <div class="modal-content">
+                        <h3 class="modal-title">${title}</h3>
+                        <p class="modal-message">${message}</p>
+                        <button class="modal-button" id="modal-close-btn">${t('alertClose')}</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modal-close-btn').onclick = () => {
+                modalContainer.innerHTML = '';
+            };
+        }
+
+        function updateTexts() {
+            // Update static texts
+            document.getElementById('app-title').textContent = translations.en.title; // Always English
+            document.getElementById('lang-switch-btn').textContent = (currentLang === 'en' ? 'AR' : 'EN');
+            document.getElementById('login-logout-btn').textContent = currentUser ? t('logout') : t('login');
+            document.getElementById('customize-cake-title').textContent = t('customizeCake');
+            document.getElementById('custom-design-title').textContent = t('customDesignNotesTitle');
+            document.getElementById('custom-design-notes').placeholder = t('customDesignNotesPlaceholder');
+            document.getElementById('upload-image-label').textContent = t('uploadImage');
+            document.getElementById('image-preview-text').textContent = t('imagePreview');
+            document.getElementById('order-summary-title').textContent = t('orderSummary');
+            document.getElementById('final-total-price-summary').innerHTML = `${t('totalPrice')}: <span class="text-purple-700">${t('ils')} ${totalPrice}</span>`;
+            document.getElementById('proceed-to-checkout-btn').textContent = t('checkout');
+
+            // Checkout page texts
+            if (!document.getElementById('checkout-page').classList.contains('hidden')) { // Only update if visible
+                document.getElementById('checkout-title').textContent = t('checkout');
+                document.getElementById('your-cake-summary-title').textContent = t('orderSummary'); // Reusing translation
+                document.getElementById('checkout-total-price-summary').innerHTML = `${t('totalPrice')}: <span class="text-purple-700">${t('ils')} ${totalPrice}</span>`;
+                document.getElementById('estimated-preparation-time').innerHTML = `${t('estimatedPreparationTime')} <span class="font-bold">2-4 ${t('hours')}</span>`;
+                document.getElementById('estimated-delivery-time').innerHTML = `${t('estimatedDeliveryTime')} <span class="font-bold">1-2 ${t('workingDays')}</span>`;
+                document.getElementById('customer-info-title').textContent = t('customerInfo');
+                document.getElementById('customer-name-label').textContent = t('name') + ':';
+                document.getElementById('customer-phone-label').textContent = t('phone') + ':';
+                document.getElementById('customer-email-label').textContent = t('email') + ':';
+                document.getElementById('customer-address-label').textContent = t('address') + ':';
+                document.getElementById('customer-name').placeholder = t('name');
+                document.getElementById('customer-phone').placeholder = t('phone');
+                document.getElementById('customer-email').placeholder = t('email');
+                document.getElementById('customer-address').placeholder = t('address');
+                document.getElementById('select-payment-method-title').textContent = t('selectPaymentMethod');
+                // The payment selection buttons below are handled by updatePaymentMethodButtons()
+                document.getElementById('return-to-edit-btn').textContent = t('returnToEdit');
+                document.getElementById('whatsapp-order-link').querySelector('button').textContent = t('sendOnWhatsApp');
+                document.getElementById('confirm-order-final-btn').textContent = t('confirmOrderFinal');
+                document.getElementById('specify-color-title').textContent = t('specifyColor');
+                document.getElementById('custom-color-text-input').placeholder = t('specifyColor');
+                document.getElementById('specify-filling-title').textContent = t('specifyFilling');
+                document.getElementById('custom-filling-text-input').placeholder = t('specifyFilling');
+            }
+
+            // Update dynamically rendered sections (e.g., options, summary)
+            renderCustomizationOptions();
+            calculateTotalPrice(); // Recalculate after price change
+            updateOrderSummary();
+            if (!document.getElementById('checkout-page').classList.contains('hidden')) {
+                updateCheckoutOrderSummary(); // Make sure checkout summary also updates
+            }
+        }
+
+        // --- Core Logic: Price Calculation ---
+        function calculateTotalPrice() {
+            const shapePrice = shapes.find(s => s.id === selectedShape)?.price || 0;
+            const flavorPrice = flavors.find(f => f.id === selectedFlavor)?.price || 0;
+            const colorPrice = colors.find(c => c.id === selectedColor)?.price || 0;
+            const designPrice = designs.find(d => d.id === selectedDesign)?.price || 0;
+            const creamPrice = creamTypes.find(c => c.id === selectedCream)?.price || 0;
+            const fillingPrice = fillingTypes.find(f => f.id === selectedFilling)?.price || 0;
+
+            totalPrice = shapePrice + flavorPrice + colorPrice + designPrice + creamPrice + fillingPrice;
+            document.getElementById('total-price-display').innerHTML = `${t('totalPrice')}: <span class="text-purple-700">${t('ils')} ${totalPrice}</span>`;
+        }
+
+        // --- UI Rendering Functions ---
+        function createOptionButton(option, type, selectedValue, onChange) {
+            const button = document.createElement('button');
+            button.classList.add(
+                'p-4', 'rounded-lg', 'flex', 'flex-col', 'items-center', 'justify-center',
+                'text-lg', 'font-medium', 'text-center', 'transition-all', 'duration-200'
+            );
+            button.onclick = () => onChange(option.id);
+
+            const isSelected = selectedValue === option.id;
+            if (isSelected) {
+                button.classList.add('bg-blue-600', 'text-white', 'shadow-md', 'transform', 'scale-105');
+            } else {
+                button.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200', 'hover:shadow-sm');
+            }
+
+            // Specific styling for color options
+            if (type === 'color' && option.id !== 'other') {
+                if (isSelected) {
+                    button.style.borderColor = option.text;
+                    button.style.backgroundColor = option.hex;
+                    button.style.color = option.text;
+                } else {
+                    button.style.backgroundColor = option.hex;
+                    button.style.color = option.text;
+                }
+                button.classList.add('border-2', 'border-transparent');
+                if (!isSelected) { // Add hover effect only if not selected
+                     button.classList.add('hover:border-blue-400');
+                }
+
+                const colorSpan = document.createElement('span');
+                colorSpan.classList.add('w-6', 'h-6', 'rounded-full', 'mb-2'); // Removed mr-2 as it might conflict with RTL layout
+                colorSpan.style.backgroundColor = option.hex;
+                colorSpan.style.border = `1px solid ${option.text === '#333333' ? '#ccc' : option.text}`;
+                button.appendChild(colorSpan);
+            } else if (type === 'color' && option.id === 'other') {
+                button.classList.add('border-2', 'border-dashed', 'border-gray-400', 'hover:border-blue-500');
+            }
+
+
+            // For shape images
+            if (type === 'shape' && option.imageUrl) {
+                const img = document.createElement('img');
+                img.src = option.imageUrl;
+                img.alt = t(option.nameKey);
+                img.classList.add('w-16', 'h-12', 'object-cover', 'rounded-md', 'mb-2');
+                button.appendChild(img);
+            }
+
+            const textDiv = document.createElement('div');
+            textDiv.innerHTML = `${t(option.nameKey)} <br/> (${t('ils')} ${option.price})`;
+            button.appendChild(textDiv);
+
+            return button;
+        }
+
+        function renderSelectionGroup(titleKey, optionsData, selectedValue, setSelectedFunction, type, hasImages = false) {
+            const sectionDiv = document.createElement('div');
+            sectionDiv.classList.add('mb-8', 'p-6', 'bg-white', 'rounded-xl', 'shadow-lg');
+            const title = document.createElement('h2');
+            title.classList.add('text-2xl', 'font-bold', 'text-gray-800', 'mb-4');
+            title.textContent = t(titleKey);
+            sectionDiv.appendChild(title);
+
+            const optionsGrid = document.createElement('div');
+            optionsGrid.classList.add('grid', 'grid-cols-2', 'md:grid-cols-3', 'lg:grid-cols-4', 'gap-4');
+
+            optionsData.forEach(option => {
+                const button = createOptionButton(option, type, selectedValue, setSelectedFunction);
+                optionsGrid.appendChild(button);
+            });
+            sectionDiv.appendChild(optionsGrid);
+            return sectionDiv;
+        }
+
+        function renderCustomizationOptions() {
+            const customizationSectionsDiv = document.getElementById('customization-sections');
+            customizationSectionsDiv.innerHTML = ''; // Clear previous options
+
+            customizationSectionsDiv.appendChild(renderSelectionGroup('shape', shapes, selectedShape, (id) => { selectedShape = id; calculateTotalPrice(); updateOrderSummary(); renderCustomizationOptions(); }));
+            customizationSectionsDiv.appendChild(renderSelectionGroup('flavor', flavors, selectedFlavor, (id) => { selectedFlavor = id; calculateTotalPrice(); updateOrderSummary(); renderCustomizationOptions(); }));
+            customizationSectionsDiv.appendChild(renderSelectionGroup('color', colors, selectedColor, (id) => {
+                selectedColor = id;
+                // Clear custom color text if "other" is deselected
+                if (id !== 'other') {
+                    customColorText = '';
+                    document.getElementById('custom-color-text-input').value = '';
+                }
+                calculateTotalPrice();
+                updateOrderSummary();
+                renderCustomizationOptions(); // Re-render to show/hide custom color input
+                document.getElementById('custom-color-input-section').classList.toggle('hidden', id !== 'other');
+            }, 'color'));
+            customizationSectionsDiv.appendChild(renderSelectionGroup('design', designs, selectedDesign, (id) => {
+                selectedDesign = id;
+                calculateTotalPrice();
+                updateOrderSummary();
+                renderCustomizationOptions(); // Re-render to show/hide custom design inputs
+                document.getElementById('custom-design-inputs').classList.toggle('hidden', id !== 'custom');
+            }));
+            customizationSectionsDiv.appendChild(renderSelectionGroup('creamType', creamTypes, selectedCream, (id) => { selectedCream = id; calculateTotalPrice(); updateOrderSummary(); renderCustomizationOptions(); }));
+            customizationSectionsDiv.appendChild(renderSelectionGroup('filling', fillingTypes, selectedFilling, (id) => {
+                selectedFilling = id;
+                // Clear custom filling text if "other" is deselected
+                if (id !== 'other') {
+                    customFillingText = '';
+                    document.getElementById('custom-filling-text-input').value = '';
+                }
+                calculateTotalPrice();
+                updateOrderSummary();
+                renderCustomizationOptions(); // Re-render to show/hide custom filling input
+                document.getElementById('custom-filling-input-section').classList.toggle('hidden', id !== 'other');
+            }));
+
+            // Make sure custom design/color/filling inputs visibility is correct on initial render/language switch
+            document.getElementById('custom-design-inputs').classList.toggle('hidden', selectedDesign !== 'custom');
+            document.getElementById('custom-color-input-section').classList.toggle('hidden', selectedColor !== 'other');
+            document.getElementById('custom-filling-input-section').classList.toggle('hidden', selectedFilling !== 'other');
+        }
+
+        function updateOrderSummary() {
+            const summaryDiv = document.getElementById('order-summary-details');
+            summaryDiv.innerHTML = '';
+
+            const getOptionName = (options, id, customText = '') => {
+                if (id === 'other' && customText) return customText;
+                const option = options.find(o => o.id === id);
+                return option ? t(option.nameKey) : t('notSelected');
+            };
+
+            const getOptionPrice = (options, id) => {
+                const option = options.find(o => o.id === id);
+                return option ? option.price : 0;
+            };
+
+            const appendSummaryItem = (labelKey, value, price) => {
+                const p = document.createElement('p');
+                p.classList.add('text-lg', 'text-gray-700', 'mb-2');
+                p.innerHTML = `<span class="font-semibold">${t(labelKey)}:</span> ${value} (${t('ils')} ${price})`;
+                summaryDiv.appendChild(p);
+            };
+
+            appendSummaryItem('shape', getOptionName(shapes, selectedShape), getOptionPrice(shapes, selectedShape));
+            appendSummaryItem('flavor', getOptionName(flavors, selectedFlavor), getOptionPrice(flavors, selectedFlavor));
+            appendSummaryItem('color', getOptionName(colors, selectedColor, document.getElementById('custom-color-text-input')?.value || ''), getOptionPrice(colors, selectedColor));
+            appendSummaryItem('design', getOptionName(designs, selectedDesign), getOptionPrice(designs, selectedDesign));
+            if (selectedDesign === 'custom' && customDesignNotes) {
+                const p = document.createElement('p');
+                p.classList.add('text-lg', 'text-gray-700', 'mb-2', 'col-span-full');
+                p.innerHTML = `<span class="font-semibold">${t('customDesignNotesTitle')}:</span> ${customDesignNotes}`;
+                summaryDiv.appendChild(p);
+            }
+            if (selectedDesign === 'custom' && uploadedCustomDesignImage) {
+                const div = document.createElement('div');
+                div.classList.add('mb-2', 'col-span-full');
+                div.innerHTML = `<span class="font-semibold">${t('imagePreview')}:</span> <img src="${uploadedCustomDesignImage}" alt="Custom Design" class="inline-block h-16 w-16 object-cover rounded-md mr-2" />`;
+                summaryDiv.appendChild(div);
+            }
+            appendSummaryItem('creamType', getOptionName(creamTypes, selectedCream), getOptionPrice(creamTypes, selectedCream));
+            appendSummaryItem('filling', getOptionName(fillingTypes, selectedFilling, document.getElementById('custom-filling-text-input')?.value || ''), getOptionPrice(fillingTypes, selectedFilling));
+
+            document.getElementById('final-total-price-summary').innerHTML = `${t('totalPrice')}: <span class="text-purple-700">${t('ils')} ${totalPrice}</span>`;
+        }
+
+        function updateCheckoutOrderSummary() {
+            const summaryDiv = document.getElementById('checkout-order-summary-details');
+            summaryDiv.innerHTML = '';
+
+            const getOptionName = (options, id, customText = '') => {
+                if (id === 'other' && customText) return customText;
+                const option = options.find(o => o.id === id);
+                return option ? t(option.nameKey) : t('notSelected');
+            };
+
+            const getOptionPrice = (options, id) => {
+                const option = options.find(o => o.id === id);
+                return option ? option.price : 0;
+            };
+
+            const appendSummaryItem = (labelKey, value, price) => {
+                const p = document.createElement('p');
+                p.classList.add('text-lg', 'text-gray-700', 'mb-2');
+                p.innerHTML = `<span class="font-semibold">${t(labelKey)}:</span> ${value} (${t('ils')} ${price})`;
+                summaryDiv.appendChild(p);
+            };
+
+            appendSummaryItem('shape', getOptionName(shapes, selectedShape), getOptionPrice(shapes, selectedShape));
+            appendSummaryItem('flavor', getOptionName(flavors, selectedFlavor), getOptionPrice(flavors, selectedFlavor));
+            appendSummaryItem('color', getOptionName(colors, selectedColor, document.getElementById('custom-color-text-input')?.value || ''), getOptionPrice(colors, selectedColor));
+            appendSummaryItem('design', getOptionName(designs, selectedDesign), getOptionPrice(designs, selectedDesign));
+            if (selectedDesign === 'custom' && customDesignNotes) {
+                const p = document.createElement('p');
+                p.classList.add('text-lg', 'text-gray-700', 'mb-2', 'col-span-full');
+                p.innerHTML = `<span class="font-semibold">${t('customDesignNotesTitle')}:</span> ${customDesignNotes}`;
+                summaryDiv.appendChild(p);
+            }
+            if (selectedDesign === 'custom' && uploadedCustomDesignImage) {
+                const div = document.createElement('div');
+                div.classList.add('col-span-full', 'flex', 'items-center');
+                div.innerHTML = `<span class="font-semibold">${t('imagePreview')}:</span> <img src="${uploadedCustomDesignImage}" alt="Custom Design" class="h-16 w-16 object-cover rounded-md mr-2" />`;
+                summaryDiv.appendChild(div);
+            }
+            appendSummaryItem('creamType', getOptionName(creamTypes, selectedCream), getOptionPrice(creamTypes, selectedCream));
+            appendSummaryItem('filling', getOptionName(fillingTypes, selectedFilling, document.getElementById('custom-filling-text-input')?.value || ''), getOptionPrice(fillingTypes, selectedFilling));
+
+            document.getElementById('checkout-total-price-summary').innerHTML = `${t('totalPrice')}: <span class="text-purple-700">${t('ils')} ${totalPrice}</span>`;
+            document.getElementById('estimated-preparation-time').innerHTML = `${t('estimatedPreparationTime')} <span class="font-bold">2-4 ${t('hours')}</span>`;
+            document.getElementById('estimated-delivery-time').innerHTML = `${t('estimatedDeliveryTime')} <span class="font-bold">1-2 ${t('workingDays')}</span>`;
+        }
+
+        // --- Page Navigation ---
+        function navigateToCheckout() {
+            document.getElementById('customization-page').classList.add('hidden');
+            document.getElementById('checkout-page').classList.remove('hidden');
+            // Ensure checkout page is displayed as flex for centering
+            document.getElementById('checkout-page').classList.add('flex', 'flex-col', 'items-center'); 
+            updateCheckoutOrderSummary(); // Populate checkout summary
+            updateWhatsAppLink(); // Update WhatsApp link with current order details
+            updatePaymentMethodButtons(); // Ensure payment buttons are updated
+        }
+
+        function navigateToCustomization() {
+            document.getElementById('customization-page').classList.remove('hidden');
+            document.getElementById('checkout-page').classList.add('hidden');
+            document.getElementById('checkout-page').classList.remove('flex', 'flex-col', 'items-center');
+            updateTexts(); // Update texts and elements
+        }
+
+        // --- WhatsApp Link Update ---
+        function updateWhatsAppLink() {
+            const customerName = document.getElementById('customer-name').value;
+            const customerPhone = document.getElementById('customer-phone').value;
+            const customerAddress = document.getElementById('customer-address').value;
+
+            const finalSelectedColorName = selectedColor === 'other' ? document.getElementById('custom-color-text-input').value : (colors.find(c => c.id === selectedColor)?.nameKey || 'notSelected');
+            const finalSelectedFillingName = selectedFilling === 'other' ? document.getElementById('custom-filling-text-input').value : (fillingTypes.find(f => f.id === selectedFilling)?.nameKey || 'notSelected');
+
+            let whatsappText = `Chew Chew Cake:\n`; // Always English site title
+            whatsappText += `${t('shape')}: ${t(shapes.find(s => s.id === selectedShape)?.nameKey || 'notSelected')} (${t('ils')} ${shapes.find(s => s.id === selectedShape)?.price || 0})\n`;
+            whatsappText += `${t('flavor')}: ${t(flavors.find(f => f.id === selectedFlavor)?.nameKey || 'notSelected')} (${t('ils')} ${flavors.find(f => f.id === selectedFlavor)?.price || 0})\n`;
+            whatsappText += `${t('color')}: ${finalSelectedColorName} (${t('ils')} ${colors.find(c => c.id === selectedColor)?.price || 0})\n`;
+            whatsappText += `${t('design')}: ${t(designs.find(d => d.id === selectedDesign)?.nameKey || 'notSelected')} (${t('ils')} ${designs.find(d => d.id === selectedDesign)?.price || 0})\n`;
+            if (selectedDesign === 'custom' && customDesignNotes) {
+                whatsappText += `${t('customDesignNotesTitle')}: ${customDesignNotes}\n`;
+            }
+            if (selectedDesign === 'custom' && uploadedCustomDesignImage) {
+                whatsappText += `${t('imagePreview')}: ${uploadedCustomDesignImage}\n`; // Note: Image URL might be too long for WhatsApp
+            }
+            whatsappText += `${t('creamType')}: ${t(creamTypes.find(c => c.id === selectedCream)?.nameKey || 'notSelected')} (${t('ils')} ${creamTypes.find(c => c.id === selectedCream)?.price || 0})\n`;
+            whatsappText += `${t('filling')}: ${finalSelectedFillingName} (${t('ils')} ${fillingTypes.find(f => f.id === selectedFilling)?.price || 0})\n`;
+            whatsappText += `\n${t('customerInfo')}:\n`;
+            whatsappText += `${t('name')}: ${customerName}\n`;
+            whatsappText += `${t('phone')}: ${customerPhone}\n`;
+            whatsappText += `${t('address')}: ${customerAddress}\n`;
+            whatsappText += `${t('selectPaymentMethod')}: ${selectedPaymentMethod === 'cod' ? t('cashOnDelivery') : t('payPal')}\n`; // Translate payment method
+            whatsappText += `\n${t('totalPrice')}: ${t('ils')} ${totalPrice}`;
+
+            document.getElementById('whatsapp-order-link').href = `https://wa.me/?text=${encodeURIComponent(whatsappText)}`;
+        }
+
+        // --- IndexedDB (for PWA Offline Data & CRUD demo) ---
+        let dbRequest;
+        let indexedDB;
+
+        function openIndexedDB() {
+            return new Promise((resolve, reject) => {
+                dbRequest = window.indexedDB.open('ChewChewCakeDB', 1);
+
+                dbRequest.onerror = (event) => {
+                    console.error('IndexedDB error:', event.target.error);
+                    reject(event.target.error);
+                };
+
+                dbRequest.onsuccess = (event) => {
+                    indexedDB = event.target.result;
+                    console.log('IndexedDB opened successfully');
+                    resolve(indexedDB);
+                };
+
+                dbRequest.onupgradeneeded = (event) => {
+                    indexedDB = event.target.result;
+                    const objectStore = indexedDB.createObjectStore('localOrders', { keyPath: 'id', autoIncrement: true });
+                    objectStore.createIndex('orderDate', 'orderDate', { unique: false });
+                    console.log('IndexedDB upgraded');
+                };
+            });
+        }
+
+        async function addLocalOrder(orderData) {
+            try {
+                if (!indexedDB) await openIndexedDB();
+                const transaction = indexedDB.transaction(['localOrders'], 'readwrite');
+                const objectStore = transaction.objectStore('localOrders');
+                const request = objectStore.add({ ...orderData, orderDate: new Date() });
+
+                request.onsuccess = () => {
+                    console.log('Local order added:', request.result);
+                    listLocalOrders(); // Refresh list after adding
+                };
+                request.onerror = (event) => {
+                    console.error('Error adding local order:', event.target.error);
+                };
+            } catch (error) {
+                console.error('Error with IndexedDB:', error);
+            }
+        }
+
+        async function listLocalOrders() {
+            try {
+                if (!indexedDB) await openIndexedDB();
+                const transaction = indexedDB.transaction(['localOrders'], 'readonly');
+                const objectStore = transaction.objectStore('localOrders');
+                const request = objectStore.getAll();
+
+                request.onsuccess = () => {
+                    const orders = request.result;
+                    const outputDiv = document.getElementById('local-orders-output');
+                    outputDiv.innerHTML = '';
+                    if (orders.length === 0) {
+                        outputDiv.innerHTML = `<p class="text-gray-600">${t('localOrdersOutput')}</p>`;
+                        return;
+                    }
+                    orders.forEach(order => {
+                        const p = document.createElement('p');
+                        p.classList.add('text-sm', 'text-gray-800', 'mb-1');
+                        p.textContent = `ID: ${order.id}, Flavor: ${order.flavor}, Price: ${order.totalPrice} ${t('ils')}`;
+                        outputDiv.appendChild(p);
+                    });
+                };
+                request.onerror = (event) => {
+                    console.error('Error listing local orders:', event.target.error);
+                };
+            } catch (error) {
+                console.error('Error with IndexedDB:', error);
+            }
+        }
+
+        async function clearLocalOrders() {
+            try {
+                if (!indexedDB) await openIndexedDB();
+                const transaction = indexedDB.transaction(['localOrders'], 'readwrite');
+                const objectStore = transaction.objectStore('localOrders');
+                const request = objectStore.clear();
+
+                request.onsuccess = () => {
+                    console.log('Local orders cleared');
+                    showCustomModal('تم مسح جميع الطلبات المحلية.');
+                    listLocalOrders(); // Refresh list after clearing
+                };
+                request.onerror = (event) => {
+                    console.error('Error clearing local orders:', event.target.error);
+                };
+            } catch (error) {
+                console.error('Error with IndexedDB:', error);
+            }
+        }
+
+        // --- Chart.js ---
+        let flavorChartInstance = null;
+        async function renderFlavorChart() {
+            const ctx = document.getElementById('flavorChart').getContext('2d');
+            let orders = [];
+
+            // Fetch data from IndexedDB
+            try {
+                if (!indexedDB) await openIndexedDB();
+                const transaction = indexedDB.transaction(['localOrders'], 'readonly');
+                const objectStore = transaction.objectStore('localOrders');
+                const request = objectStore.getAll();
+                orders = await new Promise((resolve, reject) => {
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            } catch (error) {
+                console.warn("Could not fetch local orders for chart, using mock data.", error);
+                // Fallback to mock data if IndexedDB fails or is empty
+                orders = [
+                    { flavor: 'chocolate', totalPrice: 25 },
+                    { flavor: 'vanilla', totalPrice: 18 },
+                    { flavor: 'strawberry', totalPrice: 30 },
+                    { flavor: 'chocolate', totalPrice: 25 },
+                    { flavor: 'lemon', totalPrice: 22 },
+                    { flavor: 'vanilla', totalPrice: 18 },
+                ];
+            }
+
+
+            const flavorCounts = {};
+            orders.forEach(order => {
+                const flavorName = t(flavors.find(f => f.id === order.flavor)?.nameKey || order.flavor || 'Unknown');
+                flavorCounts[flavorName] = (flavorCounts[flavorName] || 0) + 1;
+            });
+
+            const labels = Object.keys(flavorCounts);
+            const data = Object.values(flavorCounts);
+
+            if (flavorChartInstance) {
+                flavorChartInstance.destroy(); // Destroy previous instance
+            }
+
+            flavorChartInstance = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: t('flavorDistribution'),
+                        data: data,
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9933', '#C9CBCF', '#6A8F1A'
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    family: 'Inter',
+                                },
+                            },
+                        },
+                        title: {
+                            display: true,
+                            text: t('flavorDistribution'),
+                            font: {
+                                family: 'Inter',
+                                size: 16,
+                            },
+                        }
+                    }
+                }
+            });
+        }
+
+
+        // --- Firebase Initialization and Authentication ---
+        async function initializeFirebase() {
+            // Use Canvas globals if available, otherwise use placeholders
+            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+                apiKey: "YOUR_API_KEY", // Replace with your actual Firebase API Key
+                authDomain: "YOUR_AUTH_DOMAIN",
+                projectId: "YOUR_PROJECT_ID",
+                storageBucket: "YOUR_STORAGE_BUCKET",
+                messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+                appId: "YOUR_APP_ID",
+            };
+
+            const appInstance = window.firebaseApp(firebaseConfig);
+            firebaseAuth = window.getAuth(appInstance);
+            firestoreDb = window.getFirestore(appInstance);
+
+            // Authentication logic for Canvas environment or anonymous login
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                try {
+                    await window.signInWithCustomToken(firebaseAuth, __initial_auth_token);
+                    console.log("Signed in with custom token.");
+                } catch (error) {
+                    console.error("Error signing in with custom token:", error);
+                    await window.signInAnonymously(firebaseAuth); // Fallback
+                    console.log("Signed in anonymously as fallback.");
+                }
+            } else {
+                await window.signInAnonymously(firebaseAuth); // Sign in anonymously if no token is provided
+                console.log("Signed in anonymously.");
+            }
+
+            window.onAuthStateChanged(firebaseAuth, (user) => {
+                currentUser = user;
+                if (user) {
+                    console.log("User UID:", user.uid);
+                    document.getElementById('login-logout-btn').textContent = t('logout');
+                    document.getElementById('login-logout-btn').onclick = logout;
+                } else {
+                    document.getElementById('login-logout-btn').textContent = t('login');
+                    document.getElementById('login-logout-btn').onclick = login;
+                }
+                updateTexts(); // Update texts based on login status
+            });
+        }
+
+        async function login() {
+            const provider = new window.GoogleAuthProvider();
+            try {
+                const result = await window.signInWithPopup(firebaseAuth, provider);
+                currentUser = result.user;
+                // No need to manually update button text, onAuthStateChanged will handle it
+            } catch (error) {
+                console.error("Login failed:", error);
+                showCustomModal(t('loginFailed'));
+            }
+        }
+
+        async function logout() {
+            try {
+                await window.signOut(firebaseAuth);
+                currentUser = null;
+                // No need to manually update button text, onAuthStateChanged will handle it
+            } catch (error) {
+                console.error("Logout failed:", error);
+                showCustomModal(t('errorSavingOrder')); // Generic error for logout issues
+            }
+        }
+
+        // --- Event Listeners and Initial Setup ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize Firebase
+            await initializeFirebase();
+            await openIndexedDB(); // Open IndexedDB on load
+
+            // Set initial language and direction
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            updateTexts(); // Apply translations to initial static content
+
+            // Render initial customization options
+            renderCustomizationOptions();
+            calculateTotalPrice();
+            updateOrderSummary();
+
+            // Set initial default selections if none are made
+            if (!selectedShape && shapes.length > 0) selectedShape = shapes[0].id;
+            if (!selectedFlavor && flavors.length > 0) selectedFlavor = flavors[0].id;
+            if (!selectedColor && colors.length > 0) selectedColor = colors[0].id;
+            if (!selectedDesign && designs.length > 0) selectedDesign = designs[0].id;
+            if (!selectedCream && creamTypes.length > 0) selectedCream = creamTypes[0].id;
+            if (!selectedFilling && fillingTypes.length > 0) selectedFilling = fillingTypes[0].id;
+
+            // Event listeners
+            document.getElementById('lang-switch-btn').addEventListener('click', () => {
+                currentLang = currentLang === 'en' ? 'ar' : 'en';
+                localStorage.setItem("lang", currentLang);
+                document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+                updateTexts();
+            });
+
+            document.getElementById('proceed-to-checkout-btn').addEventListener('click', handleProceedToCheckout);
+            document.getElementById('return-to-edit-btn').addEventListener('click', navigateToCustomization);
+            document.getElementById('confirm-order-final-btn').addEventListener('click', handleSubmit);
+            document.getElementById('custom-design-image-input').addEventListener('change', handleImageUpload); // Attach handler here
+            document.getElementById('custom-design-notes').addEventListener('input', (event) => { customDesignNotes = event.target.value; updateOrderSummary(); });
+            document.getElementById('custom-color-text-input').addEventListener('input', (event) => { customColorText = event.target.value; updateOrderSummary(); });
+            document.getElementById('custom-filling-text-input').addEventListener('input', (event) => { customFillingText = event.target.value; updateOrderSummary(); });
+
+
+            // Customer Info inputs for WhatsApp link update
+            document.getElementById('customer-name').addEventListener('input', (event) => { customerInfo.name = event.target.value; updateWhatsAppLink(); });
+            document.getElementById('customer-phone').addEventListener('input', (event) => { customerInfo.phone = event.target.value; updateWhatsAppLink(); });
+            document.getElementById('customer-address').addEventListener('input', (event) => { customerInfo.address = event.target.value; updateWhatsAppLink(); });
+            document.getElementById('customer-email').addEventListener('input', (event) => { customerInfo.email = event.target.value; updateWhatsAppLink(); }); // Also include email for consistency
+
+            // Payment method selection buttons
+            document.getElementById('select-paypal-btn').addEventListener('click', () => {
+                selectedPaymentMethod = 'paypal';
+                updatePaymentMethodButtons();
+            });
+            document.getElementById('select-cod-btn').addEventListener('click', () => {
+                selectedPaymentMethod = 'cod';
+                updatePaymentMethodButtons();
+            });
+
+            // IndexedDB & Chart.js buttons
+            document.getElementById('add-mock-order-btn').addEventListener('click', () => {
+                const mockOrder = {
+                    shape: 'round', flavor: 'chocolate', color: 'red', design: 'simple',
+                    cream: 'buttercream', filling: 'strawberry_jam', totalPrice: Math.floor(Math.random() * 50) + 50,
+                    customerInfo: { name: 'Mock Customer', phone: '123-456-7890', address: 'Mock Address' },
+                    timestamp: new Date().toISOString()
+                };
+                addLocalOrder(mockOrder);
+            });
+            document.getElementById('list-local-orders-btn').addEventListener('click', listLocalOrders);
+            document.getElementById('clear-local-orders-btn').addEventListener('click', clearLocalOrders);
+            document.getElementById('update-chart-btn').addEventListener('click', renderFlavorChart);
+
+            // Initial render of chart
+            renderFlavorChart();
+        });
+
+        // Function to handle image upload for custom design
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    uploadedCustomDesignImage = e.target.result;
+                    const previewImg = document.getElementById('uploaded-image-preview');
+                    previewImg.src = uploadedCustomDesignImage;
+                    document.getElementById('uploaded-image-preview-container').classList.remove('hidden');
+                    updateOrderSummary();
+                };
+                reader.readAsDataURL(file);
+            } else {
+                uploadedCustomDesignImage = null;
+                document.getElementById('uploaded-image-preview').src = '';
+                document.getElementById('uploaded-image-preview-container').classList.add('hidden');
+                updateOrderSummary();
+            }
+        }
+
+        function updatePaymentMethodButtons() {
+            const paypalBtn = document.getElementById('select-paypal-btn');
+            const codBtn = document.getElementById('select-cod-btn');
+
+            // Define classes for selected and unselected states for PayPal
+            const paypalSelectedClasses = ['bg-blue-700', 'text-white', 'shadow-md', 'transform', 'scale-105'];
+            const paypalUnselectedClasses = ['bg-blue-200', 'text-blue-800', 'hover:bg-blue-300'];
+
+            // Define classes for selected and unselected states for COD
+            const codSelectedClasses = ['bg-green-600', 'text-white', 'shadow-md', 'transform', 'scale-105'];
+            const codUnselectedClasses = ['bg-green-200', 'text-green-800', 'hover:bg-green-300'];
+
+            // Apply selected/unselected styles for PayPal
+            if (selectedPaymentMethod === 'paypal') {
+                paypalBtn.classList.add(...paypalSelectedClasses);
+                paypalBtn.classList.remove(...paypalUnselectedClasses);
+            } else {
+                paypalBtn.classList.add(...paypalUnselectedClasses);
+                paypalBtn.classList.remove(...paypalSelectedClasses);
+            }
+
+            // Apply selected/unselected styles for COD
+            if (selectedPaymentMethod === 'cod') {
+                codBtn.classList.add(...codSelectedClasses);
+                codBtn.classList.remove(...codUnselectedClasses);
+            } else {
+                codBtn.classList.add(...codUnselectedClasses);
+                codBtn.classList.remove(...codSelectedClasses);
+            }
+
+            updateWhatsAppLink(); // Ensure WhatsApp link updates with payment method
+        }
+
+        function handleProceedToCheckout() {
+            // Update custom text values from inputs
+            customColorText = document.getElementById('custom-color-text-input')?.value || '';
+            customFillingText = document.getElementById('custom-filling-text-input')?.value || '';
+            customDesignNotes = document.getElementById('custom-design-notes')?.value || '';
+
+
+            if (!selectedShape || !selectedFlavor || (!selectedColor && selectedColor !== 'other') || !selectedDesign || !selectedCream || (!selectedFilling && selectedFilling !== 'other')) {
+                showCustomModal(t('fillAllOptions'));
+                return;
+            }
+
+            if (selectedColor === 'other' && !customColorText.trim()) {
+                showCustomModal(t('specifyColor'));
+                return;
+            }
+
+            if (selectedFilling === 'other' && !customFillingText.trim()) {
+                showCustomModal(t('specifyFilling'));
+                return;
+            }
+
+            if (selectedDesign === 'custom' && !customDesignNotes.trim() && !uploadedCustomDesignImage) {
+                showCustomModal(t('fillCustomDesignDetails'));
+                return;
+            }
+
+            // Update customerInfo from inputs before navigating (if they were already filled on first page)
+            // For now, we rely on the inputs on the checkout page being the source of truth for customerInfo
+            // but setting it here ensures latest values are used if fields were pre-filled before navigation.
+            customerInfo.name = document.getElementById('customer-name').value;
+            customerInfo.phone = document.getElementById('customer-phone').value;
+            customerInfo.email = document.getElementById('customer-email').value;
+            customerInfo.address = document.getElementById('customer-address').value;
+
+            navigateToCheckout();
+        }
+
+        async function handleSubmit() {
+            // Get customer info from inputs on checkout page
+            customerInfo.name = document.getElementById('customer-name').value;
+            customerInfo.phone = document.getElementById('customer-phone').value;
+            customerInfo.email = document.getElementById('customer-email').value;
+            customerInfo.address = document.getElementById('customer-address').value;
+
+            if (!customerInfo.name || !customerInfo.phone || !customerInfo.address) {
+                showCustomModal(t("fillAllContactInfo"));
+                return;
+            }
+            if (!selectedPaymentMethod) {
+                showCustomModal(t("selectAPaymentMethod"));
+                return;
+            }
+
+            const finalSelectedColor = selectedColor === 'other' ? customColorText : (colors.find(c => c.id === selectedColor)?.nameKey || t('notSelected'));
+            const finalSelectedFilling = selectedFilling === 'other' ? customFillingText : (fillingTypes.find(f => f.id === selectedFilling)?.nameKey || t('notSelected'));
+
+            const orderDetails = {
+                shape: t(shapes.find(s => s.id === selectedShape)?.nameKey || 'notSelected'),
+                flavor: t(flavors.find(f => f.id === selectedFlavor)?.nameKey || 'notSelected'),
+                color: finalSelectedColor,
+                design: t(designs.find(d => d.id === selectedDesign)?.nameKey || 'notSelected'),
+                cream: t(creamTypes.find(c => c.id === selectedCream)?.nameKey || 'notSelected'),
+                filling: finalSelectedFilling,
+                customDesignNotes: selectedDesign === 'custom' ? customDesignNotes : undefined,
+                uploadedCustomDesignImage: uploadedCustomDesignImage,
+                totalPrice: totalPrice,
+                customerInfo: customerInfo,
+                paymentMethod: selectedPaymentMethod,
+                estimatedPreparationTime: '2-4 hours',
+                estimatedDeliveryTime: '1-2 working days',
+                timestamp: new Date().toISOString() // Add timestamp for IndexedDB/Firestore
+            };
+
+            try {
+                // Save to Firestore
+                if (firestoreDb) {
+                    await window.addDoc(window.collection(firestoreDb, "orders"), {
+                        ...orderDetails,
+                        user: currentUser ? currentUser.uid : "guest",
+                        userName: currentUser ? currentUser.displayName : "Guest",
+                        userEmail: currentUser ? currentUser.email : "N/A",
+                        createdAt: window.serverTimestamp(),
+                    });
+                    console.log("Order saved to Firestore.");
+                } else {
+                    console.warn("Firestore not initialized, saving only locally.");
+                }
+
+                // Save to IndexedDB (local storage for PWA demo)
+                await addLocalOrder(orderDetails);
+
+                showCustomModal(t("orderSaved"));
+
+                // --- Handle Redirection for Online Payments ---
+                if (selectedPaymentMethod === 'paypal' && payPalMeLink) {
+                    window.open(payPalMeLink, '_blank');
+                }
+                // If COD, no redirection, just show modal
+
+                // Reset state after successful order (after potential redirection)
+                selectedShape = '';
+                    selectedFlavor = '';
+                    selectedColor = '';
+                    customColorText = '';
+                    selectedDesign = '';
+                    selectedCream = '';
+                    selectedFilling = '';
+                    customFillingText = '';
+                    customDesignNotes = '';
+                    uploadedCustomDesignImage = null;
+                    totalPrice = 0;
+                    customerInfo = { name: '', phone: '', email: '', address: '' };
+                    selectedPaymentMethod = '';
+                    document.getElementById('custom-design-image-input').value = '';
+                    document.getElementById('uploaded-image-preview-container').classList.add('hidden');
+                    document.getElementById('custom-color-text-input').value = '';
+                    document.getElementById('custom-filling-text-input').value = '';
+
+                    // Clear customer info inputs on checkout page
+                    document.getElementById('customer-name').value = '';
+                    document.getElementById('customer-phone').value = '';
+                    document.getElementById('customer-email').value = '';
+                    document.getElementById('customer-address').value = '';
+
+
+                navigateToCustomization(); // Go back to customization page
+                updatePaymentMethodButtons(); // Reset payment buttons
+            } catch (e) {
+                console.error("Error saving order: ", e);
+                showCustomModal(t("errorSavingOrder"));
+            }
+        }
+    </script>
+    <!-- PWA Service Worker File -->
+    <script id="service-worker-script">
+        // This is the content for service-worker.js
+        const CACHE_NAME = 'chew-chew-cake-cache-v1';
+        const urlsToCache = [
+            '/',
+            '/index.html',
+            // Add other assets if you have them, e.g., images, css files
+            // 'https://cdn.tailwindcss.com', // Caching CDN resources can be tricky, often better to let browser handle
+            // 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap'
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        if (response) {
+                            return response; // Cache hit - return response
+                        }
+                        return fetch(event.request); // No cache hit - fetch from network
+                    })
+            );
+        });
+    </script>
+</body>
+</html>
